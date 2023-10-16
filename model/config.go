@@ -5,7 +5,7 @@ import (
 )
 
 type LsConfig struct {
-	id         int    `orm:"column(id);auto"`
+	Id         int    `orm:"column(id);auto;pk"`
 	ConfigType string `orm:"column(configType);size(100)" description:"config type"`
 	Key        string `orm:"column(key);size(100)" description:"config name"`
 	Value      string `orm:"column(value);size(256)" description:"config value"`
