@@ -11,5 +11,5 @@ func main() {
 	// register the model as well like so  orm.RegisterModel(new(models.User))
 	r := gin.Default()
 	r.Run(":8080")
-	//
+	// did not call for the sms 
 }
