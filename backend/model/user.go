@@ -18,11 +18,9 @@ type User struct {
 // CreateUser - Add the new User to database
 // input - UserId and password
 // err - error
-func (u *User) CreateUser(userName string, password string) (user *User, err error) {
-	user.UserName=userName
-	user.Password=password
+func (u *User) CreateUser(user User) (id int64, err error) {
 	o:=orm.NewOrm()
-	_, err = o.Insert(&user)
+	id, err = o.Insert(&user)
 	return
 }
 
@@ -32,7 +30,7 @@ func (u *User) CreateUser(userName string, password string) (user *User, err err
 // err - error
 func (u *User) GetUserById(userId int) (user *User, err error) {
 	o := orm.NewOrm()
-	err = o.QueryTable("user").Filter("id", userId).One(&user)
+	err = o.QueryTable(new(User)).Filter("id", userId).One(&user)
 	return
 }
 
@@ -46,9 +44,9 @@ func (u *User) GetUserByUserName(userName string) (user *User, err error) {
 	return
 }
 
-func (u *User) UpdateUser() (id int, err error) {
+func (u *User) UpdateUserbyId() (id int, err error) {
 	return
 }
-func (u *User) DeleteUser() (id int, err error) {
+func (u *User) DeleteUserbyId() (id int, err error) {
 	return
 }

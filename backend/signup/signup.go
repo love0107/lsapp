@@ -22,7 +22,7 @@ func SignUp(c *gin.Context) {
 		fmt.Println("username already exist")
 		return
 	}
-	_, err = controller.CreateUser(user.UserName, user.Password)
+	_, err = controller.CreateUser(user)
 	if err != nil {
 		fmt.Println("unable to create new user")
 	}

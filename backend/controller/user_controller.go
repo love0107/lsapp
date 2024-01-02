@@ -21,13 +21,13 @@ func AuthenticateUser(username, password string) (*model.User, error) {
 	}
 	return user, err
 }
-func CreateUser(username, password string) (*model.User, error) {
-	password, err := auth.HashPassword(password)
+func CreateUser(user model.User) (id int64,err error) {
+	user.Password, err = auth.HashPassword(user.Password)
 	if err != nil {
 		fmt.Println("something went wrong")
-		return nil, errors.New("error while converting hash password")
+		return id, errors.New("error while converting hash password")
 	}
-	return new(model.User).CreateUser(username, password)
+	return new(model.User).CreateUser(user)
 }
 
 func GetUserByUserName(username string) (*model.User, error) {
