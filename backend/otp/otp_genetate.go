@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func GenerateOtp(length, userId int) string {
+func GenerateOtp(length int, user *model.User) string {
 	seed := time.Now().UnixNano()
 	r := rand.New(rand.NewSource(seed))
 	otp := ""
@@ -17,6 +17,10 @@ func GenerateOtp(length, userId int) string {
 	}
 	fmt.Println(otp)
 	// store the otp in the db
-	model.StoreOtp(otp, userId)
+	ls_opt := model.OTP{Otp: otp}
+	_, err :=ls_opt.AddOtp()
+	if err!=nil{
+		fmt.Println("failed to get store otp")
+	}
 	return otp
 }

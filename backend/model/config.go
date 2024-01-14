@@ -11,6 +11,9 @@ type LsConfig struct {
 	Value      string `orm:"column(value);size(256)" description:"config value"`
 }
 
+func (config *LsConfig) TableName() string {
+	return "ls_config"
+}
 // GetConfig ... get the config by its key
 // returns - config map
 // error- err
