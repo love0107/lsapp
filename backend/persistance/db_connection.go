@@ -1,6 +1,7 @@
 package persistance
 
 import (
+	"fmt"
 	"lsapp/model"
 	"time"
 
@@ -8,17 +9,23 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func Init() {
-	// Register MySQL driver
-	orm.RegisterDriver("mysql", orm.DRMySQL)
-
+func Init() error {
 	// Register database alias 'default'
-	//orm.RegisterDataBase("default", "mysql", "root:(localhost:3306)/db")
-	orm.RegisterDataBase("default", "mysql", "root:abc@123@tcp(localhost:3306)/ls?charset=utf8")
+	dbURL := `root:Password@123@tcp(localhost:3306)/ls?charset=utf8`
+	if err := orm.RegisterDataBase("default", "mysql", dbURL); err != nil {
+		return fmt.Errorf("failed to register database: %w", err)
+	}
+
 	// Set default database alias
 	orm.SetDataBaseTZ("default", time.UTC)
 
 	// Enable debug mode
 	orm.Debug = true
+
+	// Initialize ORM models
 	model.InitModel()
+
+	return nil
 }
+
+

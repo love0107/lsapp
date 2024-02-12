@@ -9,8 +9,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func AuthenticateUser(username, password string) (*model.User, error) {
-	user, err := new(model.User).GetUserByUserName(username)
+func AuthenticateUser(email, password string) (*model.User, error) {
+	user, err := new(model.User).GetUserByEmail(email)
 	if err != nil {
 		fmt.Println("invalid username")
 		return nil, err
@@ -21,17 +21,23 @@ func AuthenticateUser(username, password string) (*model.User, error) {
 	}
 	return user, err
 }
-func CreateUser(user model.User) (id int64,err error) {
+func CreateUser(user *model.User) (id int64,err error) {
 	user.Password, err = auth.HashPassword(user.Password)
 	if err != nil {
 		fmt.Println("something went wrong")
 		return id, errors.New("error while converting hash password")
 	}
-	return new(model.User).CreateUser(user)
+	return user.CreateUser()
 }
 
 func GetUserByUserName(username string) (*model.User, error) {
 	return new(model.User).GetUserByUserName(username)
+}
+func GetUserByMobile(moblie string)(*model.User, error){
+	return new(model.User).GetUserByMobile(moblie)
+}
+func GetUserByEmail(email string)(*model.User, error){
+	return new(model.User).GetUserByEmail(email)
 }
 
 func hashPassword(password string) (string, error) {
