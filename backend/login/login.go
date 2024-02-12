@@ -1,7 +1,7 @@
 package login
 
 import (
-	"fmt"
+	"lsapp/auth"
 	"lsapp/controller"
 	"lsapp/model"
 	"net/http"
@@ -10,20 +10,30 @@ import (
 )
 
 func Login(c *gin.Context) {
-	var user model.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var loginRequest model.User
+	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data"})
 		return
 	}
-	ls_user, err := controller.GetUserByUserName(user.UserName)
+
+	// Retrieve user from the database using the provided email
+	user, err := controller.GetUserByEmail(loginRequest.Email)
 	if err != nil {
-		fmt.Println("wrong username and password")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
 		return
 	}
-	if user.Password != ls_user.Password {
-		fmt.Println("wrong username and password")
+	if user == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-	// still not completed yet
-	fmt.Printf("log in success!!")
+
+	// Compare hashed password from the database with the provided plaintext password
+	isValidPassword := auth.ComparePasswords(loginRequest.Password, user.Password)
+	if !isValidPassword {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Incorrect password"})
+		return
+	}
+	
+	// Password is correct, return user data
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }

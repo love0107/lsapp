@@ -1,8 +1,6 @@
 package model
 
-import (
-	"github.com/beego/beego/orm"
-)
+import "github.com/astaxie/beego/orm"
 
 // init all the tables
 func InitModel() {
