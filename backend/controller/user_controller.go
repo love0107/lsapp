@@ -21,6 +21,7 @@ func AuthenticateUser(email, password string) (*model.User, error) {
 	}
 	return user, err
 }
+
 func CreateUser(user *model.User) (id int64,err error) {
 	user.Password, err = auth.HashPassword(user.Password)
 	if err != nil {
@@ -33,9 +34,11 @@ func CreateUser(user *model.User) (id int64,err error) {
 func GetUserByUserName(username string) (*model.User, error) {
 	return new(model.User).GetUserByUserName(username)
 }
+
 func GetUserByMobile(moblie string)(*model.User, error){
 	return new(model.User).GetUserByMobile(moblie)
 }
+
 func GetUserByEmail(email string)(*model.User, error){
 	return new(model.User).GetUserByEmail(email)
 }

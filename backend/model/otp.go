@@ -9,8 +9,10 @@ import (
 
 type OTP struct {
 	Id       int       `orm:"column(id);auto"`
+	UserID   int64     `orm:"column(user_id)"`
 	Mobile   string    `orm:"column(mobile);size(100)"`
-	SentTime time.Time `orm:"column(SentTime);type(datetime);null"`
+	SentTime time.Time `orm:"column(sentTime);type(datetime);null"`
+	ExpireAt time.Time `orm:"column(expireAt);type(datetime);null"`
 	Otp      string    `orm:"column(otp);null"`
 	Token    string    `orm:"column(token);size(32);null"`
 	SentTo   string    `orm:"column(sentTo);size(64);null"`
@@ -18,7 +20,8 @@ type OTP struct {
 
 func (otp *OTP) TableName() string {
 	return "ls_otp"
-} 
+}
+
 // add otp and store it
 func (otp *OTP) AddOtp() (id int64, err error) {
 	o := orm.NewOrm()
@@ -29,8 +32,6 @@ func (otp *OTP) AddOtp() (id int64, err error) {
 	}
 	return id, err
 }
-
-
 
 // // get the otp by user number
 // func (otp *OTP) GetOtpByNumber(number string) (ls_otp string, err error) {

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func MakeRequest(url string, payload string, method string, headers map[string]string) (string, error) {
+func MakeHttpRequest(url string, payload string, method string, headers map[string]string) (string, error) {
 	// Create a request with the specified method and the provided URL
 	req, err := http.NewRequest(method, url, strings.NewReader(payload))
 	if err != nil {
