@@ -6,21 +6,37 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
-func GenerateOtp(length int, user *model.User) string {
+func GenerateOtp(length int, user *model.User) (string, error) {
 	seed := time.Now().UnixNano()
 	r := rand.New(rand.NewSource(seed))
-	otp := ""
+	currentOTP := ""
 	for i := 0; i < length; i++ {
-		otp += strconv.Itoa(r.Intn(10))
+		currentOTP += strconv.Itoa(r.Intn(10))
 	}
-	fmt.Println(otp)
-	// store the otp in the db
-	ls_opt := model.OTP{Otp: otp}
-	_, err :=ls_opt.AddOtp()
-	if err!=nil{
-		fmt.Println("failed to get store otp")
+
+	// Store the OTP in the database
+	expireAt := time.Now().Add(5 * time.Minute)
+	opt := model.OTP{
+		Mobile:   user.Mobile,
+		Otp:      currentOTP,
+		SentTime: time.Now(),
+		ExpireAt: expireAt,
+		UserID:   user.Id,
+		SentTo: user.Mobile,
 	}
-	return otp
+	_, err := opt.AddOtp()
+	if err != nil {
+		fmt.Println("failed to store OTP:", err)
+		return "", err
+	}
+
+	return currentOTP, nil
+}
+
+func ValidateOTP(c *gin.Context) {
+    
 }

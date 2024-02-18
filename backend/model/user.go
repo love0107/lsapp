@@ -5,15 +5,16 @@ import (
 )
 
 type User struct {
-	Id       int64  `orm:"column(id);pk;auto"`
-	UserName string `orm:"column(userName);size(255)"`
-	FName    string `orm:"column(fName);size(255)"`
-	SName    string `orm:"column(sName);size(255)"`
-	Mobile   string `orm:"column(mobile);size(20)"`
-	Email    string `orm:"column(email);size(255)"`
-	Gender   string `orm:"column(gender);size(10)"`
-	Password string `orm:"column(password);size(255)"`
+    Id       int64  `orm:"column(id);pk;auto"`
+    UserName string `orm:"column(userName);size(255);unique"`
+    FName    string `orm:"column(fName);size(255)"`
+    SName    string `orm:"column(sName);size(255)"`
+    Mobile   string `orm:"column(mobile);size(20);unique"`
+    Email    string `orm:"column(email);size(255);unique"`
+    Gender   string `orm:"column(gender);size(10)"`
+    Password string `orm:"column(password);size(255)"`
 }
+
 
 
 func (u *User) TableName() string {

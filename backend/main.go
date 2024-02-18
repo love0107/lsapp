@@ -3,6 +3,7 @@ package main
 import (
 	"lsapp/login"
 	"lsapp/persistance"
+	password "lsapp/resetpassword"
 	"lsapp/signup"
 
 	"github.com/gin-gonic/gin"
@@ -11,9 +12,9 @@ import (
 func main() {
 	persistance.Init()
 	router := gin.Default()
-
 	router.POST("/signup", signup.SignUp)
 	router.POST("/login", login.Login)
+	router.POST("/password", password.RestPassword)
 	router.Run(":8080")
 }
 

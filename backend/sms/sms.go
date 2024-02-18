@@ -1,71 +1,62 @@
 package sms
 
 import (
-	"encoding/json"
-	"lsapp/log"
-	"lsapp/util"
-	"net/http"
+	"errors"
+	"log"
+	"lsapp/model"
+	"lsapp/sms/clickatell"
 )
 
+const (
+	constClickatell = "clickatell"
+)
 
-// SMSVendor is an interface for sending SMS.
-type SMSVendor interface {
-	SendSMS(request Request) (Response, error)
- }
+type SmsService interface {
+	SendSms(clickatell.Request) (clickatell.Response, error)
+}
+
+var Provider map[string]SmsService
 
 type Request struct {
-	Mobile string `json:"mobile"`
-	OTP    string `json:"otp"`
+	To      string
+	Type    string
+	Message string
+	Vendor  string
+	UserId  int64
+	Config  map[string]string
 }
 type Response struct {
-	Status     string
-	StatusCode int
-	Body       string
+	Code   int
+	Status string
+	Body   string
 }
 
-// SendSMS in the gateway layer uses the SMSVendor interface for abstraction.
-func SendSMS(request Request, vendor SMSVendor) (Response, error) {
-	// Perform any common logic
+func init() {
+	Provider = make(map[string]SmsService)
+	Provider[constClickatell] = clickatell.Clickatell{Name: constClickatell}
+}
 
-	// Use the provided vendor to send the SMS
-	response, err := vendor.SendSMS(request)
-	if err != nil {
-		// Handle errors
-		return Response{}, err
+// here need to create the service layer and after that we call send function
+func SendSms(request Request) (response Response, err error) {
+	log.Println("Request ::", request)
+	if Provider[request.Vendor] == nil {
+		log.Println("no provider found")
+		return response, errors.New("failed to make object")
 	}
+	configMap, err := model.GetConfigByType(constClickatell)
+	if err != nil {
+		log.Println("failed to get config:", constClickatell, " error:", err)
+		return response, errors.New("failed to get configs")
+	}
+	request.Config = configMap
+	resp, err := Provider[request.Vendor].SendSms(clickatell.Request(request))
+	if err != nil {
+		log.Println("failed to send sms for request", request)
+	}
+	response = Response(resp)
 
-	// Perform any post-processing logic
+	// model.AddSmsLog(response)
 
 	return response, nil
-}
 
-
-
-func SendSms(request Request) (resp Response, err error) {
-	functionName := "<SendSms>"
-	log.Println(functionName, " request:", request)
-
-	byteRequestBody, err := json.Marshal(request)
-	if err != nil {
-		log.Println(functionName, " failed to marshal request body. Error:", err)
-		return resp, err
-	}
-
-	// Initialize headers map with key and values if needed
-	headers := map[string]string{}
-
-	url := "<your_api_url>"
-	apiResponse, err := util.MakeRequest(url, string(byteRequestBody), http.MethodPost, headers)
-	if err != nil {
-		log.Println(functionName, " failed to make request. Error:", err)
-		return resp, err
-	}
-
-	err = json.Unmarshal([]byte(apiResponse), &resp)
-	if err != nil {
-		log.Println(functionName, " failed to unmarshal API response. Error:", err)
-		return resp, err
-	}
-
-	return resp, nil
 }
