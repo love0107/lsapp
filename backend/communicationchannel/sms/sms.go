@@ -3,8 +3,8 @@ package sms
 import (
 	"errors"
 	"log"
+	"lsapp/communicationchannel/sms/clickatell"
 	"lsapp/model"
-	"lsapp/sms/clickatell"
 )
 
 const (
@@ -12,7 +12,7 @@ const (
 )
 
 type SmsService interface {
-	SendSms(clickatell.Request) (clickatell.Response, error)
+	SendSms(clickatell.Request) (*clickatell.Response, error)
 }
 
 var Provider map[string]SmsService
@@ -37,7 +37,7 @@ func init() {
 }
 
 // here need to create the service layer and after that we call send function
-func SendSms(request Request) (response Response, err error) {
+func SendSms(request Request) (response *Response, err error) {
 	log.Println("Request ::", request)
 	if Provider[request.Vendor] == nil {
 		log.Println("no provider found")
@@ -46,14 +46,19 @@ func SendSms(request Request) (response Response, err error) {
 	configMap, err := model.GetConfigByType(constClickatell)
 	if err != nil {
 		log.Println("failed to get config:", constClickatell, " error:", err)
-		return response, errors.New("failed to get configs")
+		return response, err
 	}
 	request.Config = configMap
 	resp, err := Provider[request.Vendor].SendSms(clickatell.Request(request))
-	if err != nil {
+	if err != nil || resp==nil{
 		log.Println("failed to send sms for request", request)
+		return response, err
 	}
-	response = Response(resp)
+	response = &Response{
+		Code:   resp.Code,
+		Status: resp.Status,
+		Body:   resp.Body,
+	}
 
 	// model.AddSmsLog(response)
 

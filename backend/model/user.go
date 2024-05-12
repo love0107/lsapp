@@ -6,13 +6,14 @@ import (
 
 type User struct {
     Id       int64  `orm:"column(id);pk;auto"`
-    UserName string `orm:"column(userName);size(255);unique"`
     FName    string `orm:"column(fName);size(255)"`
     SName    string `orm:"column(sName);size(255)"`
     Mobile   string `orm:"column(mobile);size(20);unique"`
     Email    string `orm:"column(email);size(255);unique"`
     Gender   string `orm:"column(gender);size(10)"`
     Password string `orm:"column(password);size(255)"`
+	CreatedOn string `orm:"column(createdOn);type(datetime);auto_now_add"`
+	UpdatedOn string `orm:"column(updatedOn);type(datetime);auto_now"`
 }
 
 
@@ -82,6 +83,20 @@ func (u *User) GetUserByMobile(mobile string) (*User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+// find the user by mobile
+// input - mobile
+// return - user
+// err - error
+func (u *User) UpdateUserPassword(password string) (id int64, err error) {
+	o := orm.NewOrm()
+	u.Password=password
+	id, err =o.Update(u)
+	if err != nil {
+		return id, err
+	}
+	return id, nil
 }
 
 // Update the user by its id

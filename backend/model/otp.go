@@ -11,11 +11,14 @@ type OTP struct {
 	Id       int       `orm:"column(id);auto"`
 	UserID   int64     `orm:"column(user_id)"`
 	Mobile   string    `orm:"column(mobile);size(100)"`
+	Email    string    `orm:"column(email);size(100)"`
 	SentTime time.Time `orm:"column(sentTime);type(datetime);null"`
 	ExpireAt time.Time `orm:"column(expireAt);type(datetime);null"`
 	Otp      string    `orm:"column(otp);null"`
 	Token    string    `orm:"column(token);size(32);null"`
 	SentTo   string    `orm:"column(sentTo);size(64);null"`
+	CreatedOn  time.Time `orm:"column(createdOn);type(timestamp);auto_now_add"`
+	UpdatedOn  time.Time `orm:"column(updatedOn);type(timestamp);auto_now"`
 }
 
 func (otp *OTP) TableName() string {
@@ -33,9 +36,23 @@ func (otp *OTP) AddOtp() (id int64, err error) {
 	return id, err
 }
 
-// // get the otp by user number
-// func (otp *OTP) GetOtpByNumber(number string) (ls_otp string, err error) {
-// 	o := orm.NewOrm()
-// 	err = o.QueryTable(new(OTP)).Filter("mobile", number).Filter("created_at__gte", startOfDay).OrderBy("-created_at").Limit(1).One(&ls_otp)
-// 	return ls_otp, nil
-// }
+// get the otp by user number
+func (otp *OTP) GetOtpByEmail(email string) ( *OTP,error) {
+	o := orm.NewOrm()
+	storedOtp := &OTP{} 
+	err := o.QueryTable(new(OTP)).Filter("email", email).OrderBy("-id").One(storedOtp)
+	if err != nil {
+		return nil, err
+	}
+	return storedOtp, nil
+}
+
+func (otp *OTP) GetOtpByOTP(inputOTP string) (*OTP, error) {
+	o := orm.NewOrm()
+	storedOtp := &OTP{}
+	err := o.QueryTable(new(OTP)).Filter("otp", inputOTP).OrderBy("-id").One(storedOtp)
+	if err != nil {
+		return nil, err
+	}
+	return storedOtp, nil
+}

@@ -1,46 +1,54 @@
 package main
 
 import (
+	"lsapp/auth"
 	"lsapp/login"
+	"lsapp/otp"
+	"lsapp/password"
 	"lsapp/persistance"
-	password "lsapp/resetpassword"
 	"lsapp/signup"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	persistance.Init()
-	router := gin.Default()
-	router.POST("/signup", signup.SignUp)
-	router.POST("/login", login.Login)
-	router.POST("/password", password.RestPassword)
+
+	router := setupRouter()
+
+	// router.POST("/password/validate", otp.ValidateOTP)
 	router.Run(":8080")
 }
 
-// func getUser(c *gin.Context) {
-// 	// Extract the user ID from the URL parameter
-// 	idStr := c.Param("id")
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-// 		return
-// 	}
+func setupRouter() *gin.Engine {
+	router := gin.Default()
 
-// 	// Get the user by ID
-// 	user, err := new(model.User).GetUserById(id)
-// 	if err != nil {
-// 		// Handle the error, perhaps by sending an error response
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user"})
-// 		return
-// 	}
+	// CORS middleware
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:3000"}  // Update with your frontend URL
+	config.AllowMethods = []string{"GET", "POST", "OPTIONS"} // Allow the methods needed
 
-// 	// Check if the user is found
-// 	if user == nil {
-// 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-// 		return
-// 	}
+	router.Use(cors.New(config))
 
-// 	// Return the user data as JSON using c.JSON
-// 	c.JSON(http.StatusOK, gin.H{"user": user})
-// }
+	// Define routes
+	// Public routes
+	public := router.Group("/")
+	{
+		public.POST("/signup", signup.SignUp)
+		public.POST("/login", login.Login)
+		public.POST("/password/reset", password.RestPassword)
+	}
+
+	// Private routes
+	private := router.Group("/")
+	private.Use(auth.AuthRequired()) // Apply the middleware to these routes
+	{
+		private.POST("/password/update", password.UpdatePassword)
+		private.POST("/password/otp/validate", otp.ValidateUserOTP)
+		// private.GET("/profile", profile.GetProfile)
+        // private.PUT("/profile", profile.UpdateProfile)
+	}
+
+	return router
+}

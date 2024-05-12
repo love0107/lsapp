@@ -15,10 +15,10 @@ type LsConfig struct {
 	UpdatedOn  time.Time `orm:"column(updatedOn);type(timestamp);auto_now"`
 }
 
-//	func (config *LsConfig) TableName() string {
-//		return "ls_config"
-//	}
-//
+func (config *LsConfig) TableName() string {
+	return "ls_config"
+}
+
 // GetConfig ... get the config by its key
 // returns - config map
 // error- err
