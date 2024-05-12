@@ -1,25 +1,11 @@
-import React, { useState } from 'react';
-import Login from './components/LogIn';
-import SignUp from './components/SignUp';
-import './App.css';
+import React from 'react';
+import SignUp from './components/signup/SignUp';
+
 function App() {
-  const [user, setUser] = useState(null);
-
-  const handleSignIn = (username) => {
-    setUser(username);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-  };
-
   return (
     <div className="App">
-      {!user ? (
-        <SignUp handleSignIn={handleSignIn} />
-      ) : (
-        <Login username={user} handleLogout={handleLogout} />
-      )}
+      <h1>User Registration</h1>
+      <SignUp />
     </div>
   );
 }

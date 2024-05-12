@@ -27,7 +27,7 @@ type Response struct {
 }
 
 // SendSMS implements the SMSVendor interface for Kicktail.
-func (c Clickatell) SendSms(request Request) (response Response, err error) {
+func (c Clickatell) SendSms(request Request) (response *Response, err error) {
 
 	// Create a new GET request
 	url, err := getFullUrl(request)
@@ -51,9 +51,11 @@ func (c Clickatell) SendSms(request Request) (response Response, err error) {
 		log.Println("Error reading response body:", err)
 		return
 	}
-	response.Body = string(body)
-	response.Code = resp.StatusCode
-	response.Status = resp.Status
+	response=&Response{
+		Code:   resp.StatusCode,
+		Status: resp.Status,
+		Body:   string(body),
+	}
 	return response, nil
 }
 // get the full url
