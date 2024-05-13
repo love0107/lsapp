@@ -1,6 +1,0 @@
-
-
-
-function Home = ()=>{
-    <React></div>
-}
