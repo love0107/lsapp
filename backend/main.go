@@ -28,6 +28,8 @@ func setupRouter() *gin.Engine {
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}  // Update with your frontend URL
 	config.AllowMethods = []string{"GET", "POST", "OPTIONS"} // Allow the methods needed
+	config.AllowCredentials = true                           // Allow cookies
+	config.AllowHeaders = []string{"Content-Type"}           // Allow Content-Type header
 
 	router.Use(cors.New(config))
 
@@ -47,7 +49,7 @@ func setupRouter() *gin.Engine {
 		private.POST("/password/update", password.UpdatePassword)
 		private.POST("/password/otp/validate", otp.ValidateUserOTP)
 		// private.GET("/profile", profile.GetProfile)
-        // private.PUT("/profile", profile.UpdateProfile)
+		// private.PUT("/profile", profile.UpdateProfile)
 	}
 
 	return router

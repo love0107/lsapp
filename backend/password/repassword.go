@@ -1,11 +1,11 @@
 package password
 
 import (
-	"errors"
 	"lsapp/auth"
 	"lsapp/controller"
 	"lsapp/model"
 	"lsapp/otp"
+	"lsapp/util"
 	"net/http"
 	"time"
 
@@ -44,9 +44,17 @@ func RestPassword(c *gin.Context) {
 	}
 
 	token, err := auth.GenerateJWT(user.Email)
-	if err != nil || token == "" {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "failed to generate token",
+			"error":   err.Error(),
+		})
+		return
+	}
+	localTimeZone, err := util.GetCurrentTimeIn("Asia/Kolkata")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "failed to GetCurrentTimeIn Asia/Kolkata",
 			"error":   err.Error(),
 		})
 		return
@@ -54,12 +62,13 @@ func RestPassword(c *gin.Context) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:    "session_token",
 		Value:   token,
-		Expires: time.Now().Add(time.Minute * 5),
+		Path:    "/",
+		Expires: localTimeZone.Add(time.Minute * 5),
 	})
 
 	// generate otp
 	otp, err := otp.GenerateOtp(6, user)
-	if err != nil || otp == "" {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "failed to generate OTP",
 			"error":   err.Error(),
@@ -76,7 +85,7 @@ func RestPassword(c *gin.Context) {
 	}
 
 	response, err := sms.SendSms(dataRequest)
-	if err != nil || response == nil {
+	if err != nil {
 		c.JSON(http.StatusBadGateway, gin.H{
 			"message": "failed to send OTP",
 			"error":   err.Error(),
@@ -94,20 +103,20 @@ func RestPassword(c *gin.Context) {
 
 func UpdatePassword(c *gin.Context) {
 	existUser, exists := c.Get("user")
-    if !exists {
-        c.JSON(http.StatusUnauthorized, gin.H{
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized",
 		})
-        return
-    }
-	 // Type assertion
-	 user, ok := existUser.(*model.User)
-	 if !ok {
-		 c.JSON(http.StatusInternalServerError, gin.H{
-			 "error": "Internal Server Error",
-		 })
-		 return
-	 }
+		return
+	}
+	// Type assertion
+	user, ok := existUser.(*model.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal Server Error",
+		})
+		return
+	}
 
 	// Extract the user ID from the URL parameter
 	var resetPassword ResetPassword
@@ -121,7 +130,7 @@ func UpdatePassword(c *gin.Context) {
 
 	// hash the password
 	password, err := auth.HashPassword(resetPassword.Password)
-	if err != nil || password == "" {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "failed to hash password",
 			"error":   err.Error(),
@@ -130,20 +139,15 @@ func UpdatePassword(c *gin.Context) {
 	}
 
 	// update the password
-	id, err := user.UpdateUserPassword(password)
-	if id == 0 && err == nil{
-        err=errors.New("failed to update password")
-	}
-	if err != nil || id == 0 {
+	_, err = user.UpdateUserPassword(password)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "failed to update password",
 			"error":   err.Error(),
 		})
 		return
-
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"id":      id,
 		"message": "password changed successfully",
 		"status":  "success",
 		"code":    http.StatusOK,

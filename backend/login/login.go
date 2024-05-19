@@ -3,9 +3,10 @@ package login
 import (
 	"lsapp/auth"
 	"lsapp/controller"
+	"lsapp/util"
+	"time"
 
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,25 +18,24 @@ type Credentials struct {
 
 func Login(c *gin.Context) {
 
- // Check for an existing cookie
-    if tokenString, err := c.Cookie("session_token"); err == nil && tokenString != ""{
+	// Check for an existing cookie
+	if tokenString, err := c.Cookie("session_token"); err == nil && tokenString != "" {
 		// Validate the token
-		isValidToken, email :=auth.ValidateJWT(tokenString)
-		
-       user, err:= controller.GetUserByEmail(email)
-	   if err == nil &&  user != nil{
-		if isValidToken {
-			// If the token is valid, return a success message
-			c.JSON(http.StatusOK, gin.H{
-				"message": "Already logged in",
-				"statusCode":200,
-				"status": "success",
-			})
-			return
-		}
-	   }
-	}
+		isValidToken, email := auth.ValidateJWT(tokenString)
 
+		user, err := controller.GetUserByEmail(email)
+		if err == nil && user != nil {
+			if isValidToken {
+				// If the token is valid, return a success message
+				c.JSON(http.StatusOK, gin.H{
+					"message":    "Already logged in",
+					"statusCode": 200,
+					"status":     "success",
+				})
+				return
+			}
+		}
+	}
 
 	var loginRequest Credentials
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
@@ -48,7 +48,7 @@ func Login(c *gin.Context) {
 
 	// Retrieve user from the database using the provided email
 	user, err := controller.GetUserByEmail(loginRequest.Email)
-	if user == nil || err!= nil{
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "User not found",
 			"error":   err.Error(),
@@ -66,29 +66,34 @@ func Login(c *gin.Context) {
 		return
 	}
 
-
 	// generate jwt token
 	tokenString, err := auth.GenerateJWT(user.Email)
-	if err != nil || tokenString == ""{
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":       err.Error(),
-			"message":     "failed to generate token",
-			"tokenString": tokenString,
+			"error":   err.Error(),
+			"message": "failed to generate token",
 		})
 		return
 	}
-
-
+	localTimeZone, err := util.GetCurrentTimeIn("Asia/Kolkata")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "failed to get token",
+			"error":   err.Error(),
+		})
+		return
+	}
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:    "session_token",
 		Value:   tokenString,
-		Expires: time.Now().Add(time.Minute * 5),
+		Path:    "/",
+		Expires: localTimeZone.Add(time.Minute * 5),
 	})
 
 	// Password is correct, return user data
 	c.JSON(http.StatusOK, gin.H{
-		"message": "User logged in successfully",
-		"statusCode":200,
-		"status": "success",
+		"message":    "User logged in successfully",
+		"statusCode": 200,
+		"status":     "success",
 	})
 }
