@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,6 +19,9 @@ type Claims struct {
 func HashPassword(password string) (string, error) {
 	// Generate a salt with a cost of 10
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+	if hash == nil {
+		return "", errors.New("HashPassword:: failed to hash password")
+	}
 	return string(hash), err
 }
 
@@ -37,11 +41,14 @@ func GenerateJWT(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	crd, err := model.GetConfigByType("jwt")
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "GenerateJWT::")
 	}
 	tokenString, err := token.SignedString([]byte(crd["key"]))
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "GenerateJWT::")
+	}
+	if tokenString == "" {
+		return "", errors.New("GenerateJWT:: failed to generate token")
 	}
 	return tokenString, nil
 }
@@ -71,13 +78,16 @@ func ValidateJWT(tokenString string) (bool, string) {
 	return true, claims.Email
 }
 
-func AuthRequired() (gin.HandlerFunc) {
+func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the JWT string from the cookie
 		tokenString, err := c.Cookie("session_token")
 		if err != nil {
 			// If the cookie is not set, return an unauthorized status
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Unauthorized",
+				"error":   err.Error(),
+			})
 			c.Abort()
 			return
 		}
@@ -86,12 +96,15 @@ func AuthRequired() (gin.HandlerFunc) {
 		isValidToken, email := ValidateJWT(tokenString)
 		user, err := new(model.User).GetUserByEmail(email)
 		if err != nil || user == nil || !isValidToken {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "Unauthorized",
+				"error":   err.Error(),
+			})
 			c.Abort()
 			return
 		}
 		// Store the user information in the context.
-        c.Set("user", user)
+		c.Set("user", user)
 		// If the token is valid, continue to the route handler
 		c.Next()
 	}

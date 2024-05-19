@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"time"
 
 	"github.com/astaxie/beego/orm"
@@ -68,6 +69,9 @@ func (u *User) GetUserByEmail(email string) (user *User, err error) {
 	err = o.QueryTable(new(User)).Filter("email", email).One(user)
 	if err != nil {
 		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("User not found")
 	}
 	return user, nil
 }

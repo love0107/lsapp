@@ -4,6 +4,7 @@ import (
 	"lsapp/auth"
 	"lsapp/controller"
 	"lsapp/model"
+	"lsapp/util"
 	"net/http"
 	"time"
 
@@ -26,19 +27,28 @@ func SignUp(c *gin.Context) {
 		return
 	}
 	// set the cookie
-	cookie, err := auth.GenerateJWT(newUser.Email)
+	token, err := auth.GenerateJWT(newUser.Email)
 
-	if err != nil || cookie == "" {
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "failed to generate token",
 			"error":   err.Error(),
 		})
 		return
 	}
+	localTimeZone, err := util.GetCurrentTimeIn("Asia/Kolkata")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "failed to get current time in Asia/Kolkata timezone",
+			"error":   err.Error(),
+		})
+		return
+	}
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:    "session_token",
-		Value:   cookie,
-		Expires: time.Now().Add(time.Minute * 5),
+		Value:   token,
+		Path:    "/",
+		Expires: localTimeZone.Add(time.Minute * 5),
 	})
 
 	c.JSON(http.StatusOK, gin.H{

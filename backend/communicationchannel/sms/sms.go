@@ -50,7 +50,12 @@ func SendSms(request Request) (response *Response, err error) {
 	}
 	request.Config = configMap
 	resp, err := Provider[request.Vendor].SendSms(clickatell.Request(request))
-	if err != nil || resp==nil{
+	if resp == nil {
+		log.Println("failed to send sms for request", request)
+		return response, errors.New("failed to send sms")
+	}
+
+	if err != nil {
 		log.Println("failed to send sms for request", request)
 		return response, err
 	}

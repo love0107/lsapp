@@ -1,10 +1,10 @@
 
 import { useState } from "react";
+
 const initialValues = {
   email: "",
-  password: "",
 };
-const Login = () => {
+const Password = () => {
 
   const [inputValues, setValues] = useState(initialValues);
 
@@ -22,7 +22,7 @@ const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
   
-    const response = await fetch('http://localhost:8080/login', {
+    const response = await fetch('http://localhost:8080/password/reset', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -43,7 +43,7 @@ const Login = () => {
   return (
 
     <div>
-      <h2>Please LogIn!</h2>
+      <h2>Enter Email!</h2>
       <form onSubmit={handleSubmit}>
       <label>Email:
       <input 
@@ -53,18 +53,10 @@ const Login = () => {
         onChange={handleInputChange}
       />
       </label>
-      <label>Password:
-      <input 
-        type="password" 
-        name="password" 
-        value={inputValues.password} 
-        onChange={handleInputChange}
-      />
-      </label>
       <input type="submit" />
       </form>
     </div>
   );
 };
 
-export default Login;
+export default Password;
