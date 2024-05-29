@@ -13,8 +13,10 @@ import (
 )
 
 func main() {
-	persistance.Init()
-
+	 if err:=persistance.Init() ; err != nil {
+		 panic(err)
+	 }
+	 
 	router := setupRouter()
 
 	// router.POST("/password/validate", otp.ValidateOTP)

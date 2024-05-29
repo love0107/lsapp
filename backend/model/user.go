@@ -9,14 +9,14 @@ import (
 
 type User struct {
 	Id        int64     `orm:"column(id);pk;auto"`
-	FName     string    `orm:"column(fName);size(255)"`
-	SName     string    `orm:"column(sName);size(255)"`
+	FName     string    `orm:"column(fname);size(255)"`
+	SName     string    `orm:"column(sname);size(255)"`
 	Mobile    string    `orm:"column(mobile);size(20);unique"`
 	Email     string    `orm:"column(email);size(255);unique"`
 	Gender    string    `orm:"column(gender);size(10)"`
 	Password  string    `orm:"column(password);size(255)"`
-	CreatedOn time.Time `orm:"column(createdOn);type(datetime);auto_now_add"`
-	UpdatedOn time.Time `orm:"column(updatedOn);type(datetime);auto_now"`
+	CreatedOn time.Time `orm:"column(createdon);type(datetime);auto_now_add"`
+	UpdatedOn time.Time `orm:"column(updatedon);type(datetime);auto_now"`
 }
 
 func (u *User) TableName() string {
