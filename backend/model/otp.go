@@ -9,16 +9,16 @@ import (
 
 type OTP struct {
 	Id        int       `orm:"column(id);auto"`
-	UserID    int64     `orm:"column(userId)"`
+	UserID    int64     `orm:"column(userid)"`
 	Mobile    string    `orm:"column(mobile);size(100)"`
 	Email     string    `orm:"column(email);size(100)"`
-	SentTime  time.Time `orm:"column(sentTime);type(datetime);null"`
-	ExpireAt  time.Time `orm:"column(expireAt);type(datetime);null"`
+	SentTime  time.Time `orm:"column(senttime);type(datetime);null"`
+	ExpireAt  time.Time `orm:"column(expireat);type(datetime);null"`
 	Otp       string    `orm:"column(otp);null"`
 	Token     string    `orm:"column(token);size(32);null"`
-	SentTo    string    `orm:"column(sentTo);size(64);null"`
-	CreatedOn time.Time `orm:"column(createdOn);type(timestamp);auto_now_add"`
-	UpdatedOn time.Time `orm:"column(updatedOn);type(timestamp);auto_now"`
+	SentTo    string    `orm:"column(sentto);size(64);null"`
+	CreatedOn time.Time `orm:"column(createdon);type(timestamp);auto_now_add"`
+	UpdatedOn time.Time `orm:"column(updatedon);type(timestamp);auto_now"`
 }
 
 func (otp *OTP) TableName() string {

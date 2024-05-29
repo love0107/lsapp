@@ -8,11 +8,11 @@ import (
 
 type LsConfig struct {
 	Id         int       `orm:"column(id);auto;pk"`
-	ConfigType string    `orm:"column(configType);size(100)" description:"config type"`
+	ConfigType string    `orm:"column(configtype);size(100)" description:"config type"`
 	Key        string    `orm:"column(key);size(100)" description:"config name"`
 	Value      string    `orm:"column(value);size(256)" description:"config value"`
-	CreatedOn  time.Time `orm:"column(createdOn);type(timestamp);auto_now_add"`
-	UpdatedOn  time.Time `orm:"column(updatedOn);type(timestamp);auto_now"`
+	CreatedOn  time.Time `orm:"column(createdon);type(timestamp);auto_now_add"`
+	UpdatedOn  time.Time `orm:"column(updatedon);type(timestamp);auto_now"`
 }
 
 func (config *LsConfig) TableName() string {

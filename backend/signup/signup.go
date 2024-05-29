@@ -17,6 +17,7 @@ func SignUp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	newUser.Mobile = "91" + newUser.Mobile
 	// Create the new user
 	userId, err := controller.CreateUser(&newUser)
 	if err != nil || userId == 0 {
